@@ -19,8 +19,6 @@
 * Qt Library
 * QScint
 
--DCMAKE_PREFIX_PATH=D:\Qt5.12.11\Qt5.12.11\5.12.11\msvc2015_64\lib\cmake -DQSCINT_SDK_PATH=F:\gitee\QScint_SDK
-
 编译参数需要两个参数：
 
 * `CMAKE_PREFIX_PATH` ：表明 QT 的 SDK 存放位置
