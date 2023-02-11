@@ -1,39 +1,53 @@
 # NDD-JsonViewer
 
 #### 介绍
-{**以下是 Gitee 平台说明，您可以替换此简介**
-Gitee 是 OSCHINA 推出的基于 Git 的代码托管平台（同时支持 SVN）。专为开发者提供稳定、高效、安全的云端软件开发协作平台
-无论是个人、团队、或是企业，都能够用 Gitee 实现代码托管、项目管理、协作开发。企业项目请看 [https://gitee.com/enterprises](https://gitee.com/enterprises)}
 
-#### 软件架构
-软件架构说明
+该项目用于解决 [NDD](https://gitee.com/cxasm/notepad--) 软件的 JSON 格式化的插件。该项目是从 [JSONViewer](https://github.com/kapilratnani/JSON-Viewer) 项目移植的，目前仅支持 **JSON 的格式化和行化**，带有注释的 JSON 可以格式化或者行化，但是**注释的保存与恢复**；对于 JSON5，暂时仅支持部分解析。
+
+#### 编译流程
+
+**前提：**
+
+插件的编译说明请参考[这里](https://gitee.com/cxasm/notepad--/blob/master/%E7%BC%96%E8%AF%91%E8%AF%B4%E6%98%8E.docx)。
+
+
+
+该项目仅支持使用 `CMake` 编译。
+
+依赖项：
+
+* Qt Library
+* QScint
+
+-DCMAKE_PREFIX_PATH=D:\Qt5.12.11\Qt5.12.11\5.12.11\msvc2015_64\lib\cmake -DQSCINT_SDK_PATH=F:\gitee\QScint_SDK
+
+编译参数需要两个参数：
+
+* `CMAKE_PREFIX_PATH` ：表明 QT 的 SDK 存放位置
+* `QSCINT_SDK_PATH` ：表明 QScint 的 SDK 的存放位置
+
+示例：
+
+```bash
+mkdir build && cd build
+cmake .. -DCMAKE_PREFIX_PATH=D:\Qt5.12.11\Qt5.12.11\5.12.11\msvc2015_64\lib\cmake -DQSCINT_SDK_PATH=F:\gitee\QScint_SDK -G Ninja
+ninja
+```
+
 
 
 #### 安装教程
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+将该项目生成的动态库拷贝至 `%NPP_INSTALL_PATH%/plugin`，重启 NPP 即可。
 
 #### 使用说明
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+快捷键 `Ctrl+F8` 将会格式化选中的文本；也可以通过菜单栏的 `Json View` 中的 `Formatting Json(Ctrl+F8)`按钮格式化选中的文本。
+
+快捷键 `Ctrl+F9` 将会行化选中的文本；也可以通过菜单栏的 `Json View` 中的 `Compress Json(Ctrl+F9)`按钮行化选中的文本。
 
 #### 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
 
 
 #### 特技
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
