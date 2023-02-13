@@ -14,28 +14,29 @@
 
 NDDJsonPlugin::NDDJsonPlugin(QWidget *mainWidget, const QString &pluginPath, QsciScintilla *pEdit, QObject *parent)
     : QObject(parent),
-      scintillaEditor_(new ScintillaEditor(pEdit)),
+      scintillaEditor_(nullptr),
       jsonViewSettings_(new JsonViewSettings(pluginPath)),
       mainWidget_(mainWidget)
 {
-    addJsonViewMenu();
-    jsonViewSettings_->show();
+    // addJsonViewMenu();
+    // jsonViewSettings_->show();
 }
-void NDDJsonPlugin::addJsonViewMenu()
+void NDDJsonPlugin::getJsonViewMenu(QMenu *menu)
 {
-    auto mainWindow = dynamic_cast<QMainWindow *>(mainWidget_);
-    auto menuBar = mainWindow->menuBar();
-
-    auto jsonViewerMenu = menuBar->addMenu("Json Viewer");
-    jsonViewerMenu->addAction(
+    menu->addAction(
         "Formatting Json(Ctrl+F8)", this, [this] { formattingJson(); }, Qt::CTRL + Qt::Key_F8);
-    jsonViewerMenu->addAction(
+    menu->addAction(
         "Compress Json(Ctrl+F9)", this, [this] { compressJson(); }, Qt::CTRL + Qt::Key_F9);
-    jsonViewerMenu->addAction("Settings", this, [this] { this->jsonViewSettings_->show(); });
+    menu->addAction("Settings", this, [this] { this->jsonViewSettings_->show(); });
 }
 
 auto NDDJsonPlugin::GetFormatSetting() const -> std::tuple<LE, LF, char, unsigned>
 {
+    if (!scintillaEditor_)
+    {
+        return {};
+    }
+
     LE le = LE::kCrLf;
     LF lf = LF::kFormatDefault;
     char indentChar = ' ';
@@ -104,6 +105,12 @@ auto NDDJsonPlugin::GetFormatSetting() const -> std::tuple<LE, LF, char, unsigne
 }
 void NDDJsonPlugin::reportError(const Result &result)
 {
+    if (!scintillaEditor_)
+    {
+        showMessage("Error", "Editor is invalid.", 1);
+        return;
+    }
+
     auto start = scintillaEditor_->getSelectionStart() + result.error_pos;
     auto end = start + scintillaEditor_->getSelectionEnd();
 
@@ -126,6 +133,12 @@ int NDDJsonPlugin::showMessage(const std::string &title, const std::string &msg,
 }
 void NDDJsonPlugin::formattingJson()
 {
+    if (!scintillaEditor_)
+    {
+        showMessage("Error", "Editor is invalid.", 1);
+        return;
+    }
+
     auto setting_ = jsonViewSettings_->getPluginSetting();
     const auto selectedText = scintillaEditor_->getJsonText();
     const auto [le, lf, indentChar, indentLen] = GetFormatSetting();
@@ -142,6 +155,12 @@ void NDDJsonPlugin::formattingJson()
 }
 void NDDJsonPlugin::compressJson()
 {
+    if (!scintillaEditor_)
+    {
+        showMessage("Error", "Editor is invalid.", 1);
+        return;
+    }
+
     auto setting_ = jsonViewSettings_->getPluginSetting();
     const auto selectedText = scintillaEditor_->getJsonText();
     auto result = JsonHandler(setting_.parseOptions).GetCompressedJson(selectedText);
@@ -153,4 +172,14 @@ void NDDJsonPlugin::compressJson()
     {
         reportError(result);
     }
+}
+void NDDJsonPlugin::setScintilla(const std::function<QsciScintilla *()> & cb)
+{
+    if (scintillaEditor_)
+    {
+        delete scintillaEditor_;
+        scintillaEditor_ = nullptr;
+    }
+
+    scintillaEditor_ = new ScintillaEditor(cb);
 }

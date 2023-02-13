@@ -6,12 +6,14 @@
 
 #include <Qsci/qsciscintilla.h>
 
-ScintillaEditor::ScintillaEditor(QsciScintilla *pEdit) : scintilla_(pEdit)
+ScintillaEditor::ScintillaEditor(const std::function<QsciScintilla *()> &cb) : scintillaCallback_(cb)
 {
 }
 
 std::string ScintillaEditor::getJsonText()
 {
+    auto scintilla_ = scintillaCallback_();
+
     if (!scintilla_)
     {
         return {};
@@ -34,6 +36,7 @@ bool ScintillaEditor::isJsonFile() const
 
 void ScintillaEditor::replaceSelection(const std::string &text)
 {
+    auto scintilla_ = scintillaCallback_();
     if (!scintilla_)
     {
         return;
@@ -48,6 +51,7 @@ void ScintillaEditor::replaceSelection(const std::string &text)
 
 void ScintillaEditor::makeSelection(size_t start, size_t end)
 {
+    auto scintilla_ = scintillaCallback_();
     if (!scintilla_)
     {
         return;
@@ -68,12 +72,14 @@ auto ScintillaEditor::getSelectionEnd() const -> size_t
 
 auto ScintillaEditor::getEOL() const -> unsigned
 {
+    auto scintilla_ = scintillaCallback_();
     auto eolMode = scintilla_->SendScintilla(QsciScintillaBase::SCI_GETEOLMODE);
     return eolMode;
 }
 
 auto ScintillaEditor::getIndent() const -> std::tuple<char, unsigned>
 {
+    auto scintilla_ = scintillaCallback_();
     bool useTabs = scintilla_->SendScintilla(QsciScintillaBase::SCI_GETUSETABS);
     char indentChar = useTabs ? '\t' : ' ';
     unsigned indentLen =
@@ -84,6 +90,7 @@ auto ScintillaEditor::getIndent() const -> std::tuple<char, unsigned>
 
 void ScintillaEditor::refreshSelectionPos()
 {
+    auto scintilla_ = scintillaCallback_();
     startPos_ = scintilla_->SendScintilla(QsciScintillaBase::SCI_GETSELECTIONSTART);
     endPos_ = scintilla_->SendScintilla(QsciScintillaBase::SCI_GETSELECTIONEND);
 
@@ -94,6 +101,7 @@ void ScintillaEditor::refreshSelectionPos()
 }
 void ScintillaEditor::replaceAll(const std::string &text) const
 {
+    auto scintilla_ = scintillaCallback_();
     scintilla_->selectAll();
     scintilla_->replaceSelectedText(text.c_str());
     scintilla_->setCursorPosition(0, 0);

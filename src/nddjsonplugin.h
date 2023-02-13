@@ -5,6 +5,7 @@
 #ifndef NDD_JSON_VIEWER_NDDJSONPLUGIN_H
 #define NDD_JSON_VIEWER_NDDJSONPLUGIN_H
 
+#include <QAction>
 #include <QObject>
 #include <QWidget>
 
@@ -22,8 +23,11 @@ public:
                            QObject *parent = nullptr);
     ~NDDJsonPlugin() override = default;
 
+public:
+    void getJsonViewMenu(QMenu *menu);
+    void setScintilla(const std::function<QsciScintilla *()> & cb);
+
 private:
-    void addJsonViewMenu();
     static int showMessage(const std::string &title, const std::string &msg, int flag, bool bDontShow = false);
 
 private:

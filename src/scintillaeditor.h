@@ -6,13 +6,14 @@
 #define JSONVIEW_SCINTILLAEDITOR_H
 
 #include <string>
+#include <functional>
 
 class QsciScintilla;
 
 class ScintillaEditor
 {
   public:
-    explicit ScintillaEditor(QsciScintilla *pEdit);
+    explicit ScintillaEditor(const std::function<QsciScintilla *()>& cb);
 
     ~ScintillaEditor() = default;
 
@@ -39,7 +40,7 @@ class ScintillaEditor
     void refreshSelectionPos();
 
   private:
-    QsciScintilla *scintilla_;
+    std::function<QsciScintilla *()> scintillaCallback_;
 
     size_t startPos_ = 0;
     size_t endPos_ = 0;

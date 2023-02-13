@@ -30,7 +30,7 @@ extern "C"
 
     NDD_EXPORT bool NDD_PROC_IDENTIFY(NDD_PROC_DATA *pProcData);
     NDD_EXPORT int NDD_PROC_MAIN(QWidget *pNotepad, const QString &strFileName,
-                                 std::function<QsciScintilla *()> getCurEdit);
+                                 std::function<QsciScintilla *()> getCurEdit, NDD_PROC_DATA *procData);
 
 #ifdef __cplusplus
 }
@@ -47,19 +47,37 @@ bool NDD_PROC_IDENTIFY(NDD_PROC_DATA *pProcData)
 
     pProcData->m_version = QString("0.0.0.1");
     pProcData->m_auther = QString("Zh1an");
+
+    pProcData->m_menuType = 1;
+
     return true;
 }
 
 NDDJsonPlugin *nddJsonPlugin = nullptr;
+static NDD_PROC_DATA s_procData;
+static QWidget *s_pMainNotepad = nullptr;
+std::function<QsciScintilla *()> s_getCurEdit;
 
 // 插件的入口点函数
-int NDD_PROC_MAIN(QWidget *pNotepad, const QString &strFileName, std::function<QsciScintilla *()> getCurEdit)
+int NDD_PROC_MAIN(QWidget *pNotepad, const QString &strFileName, std::function<QsciScintilla *()> getCurEdit,
+                  NDD_PROC_DATA *pProcData)
 {
-    QsciScintilla *pEdit = getCurEdit();
+    if (pProcData == nullptr)
+    {
+        return 1;
+    }
+
+    s_pMainNotepad = pNotepad;
+    s_procData = *pProcData;
+    s_getCurEdit = getCurEdit;
 
     if (!nddJsonPlugin)
     {
-        nddJsonPlugin = new NDDJsonPlugin(pNotepad, strFileName, pEdit, pNotepad);
+        nddJsonPlugin = new NDDJsonPlugin(s_pMainNotepad, strFileName, nullptr, s_pMainNotepad);
+
+        nddJsonPlugin->getJsonViewMenu(s_procData.m_rootMenu);
+
+        nddJsonPlugin->setScintilla(s_getCurEdit);
     }
 
     return 0;
