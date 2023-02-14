@@ -15,7 +15,9 @@ JsonViewSettings::JsonViewSettings(const QString &pluginPath, QWidget *parent)
 {
     ui->setupUi(this);
 
-    init(pluginPath);
+    auto pluginDllName = pluginPath;
+
+    init(pluginDllName.replace("ndd-json-viewer.dll", ""));
 
     initConnection();
 }
@@ -61,7 +63,7 @@ void JsonViewSettings::init(const QString &pluginPath)
         pluginDir.cd("config");
     }
 
-    configSetting_ = new QSettings("JSONViewer.ini", QSettings::IniFormat);
+    configSetting_ = new QSettings(pluginDir.absolutePath() + "/JSONViewer.ini", QSettings::IniFormat);
     if (!configSetting_->contains(INI_FORMATTING_EOL_NAME))
     {
         configSetting_->setValue(INI_FORMATTING_EOL_NAME, (int)LE::kCrLf);
