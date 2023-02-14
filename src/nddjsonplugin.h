@@ -14,6 +14,9 @@
 class QsciScintilla;
 class ScintillaEditor;
 class JsonViewSettings;
+class QDockWidget;
+class QJsonModel;
+class QTreeView;
 
 class NDDJsonPlugin : public QObject
 {
@@ -25,7 +28,7 @@ public:
 
 public:
     void getJsonViewMenu(QMenu *menu);
-    void setScintilla(const std::function<QsciScintilla *()> & cb);
+    void setScintilla(const std::function<QsciScintilla *()> &cb);
 
 private:
     static int showMessage(const std::string &title, const std::string &msg, int flag, bool bDontShow = false);
@@ -37,11 +40,19 @@ private:
     void formattingJson();
     void compressJson();
 
+    void refreshTableJson();
+    void validateJson();
+    void findNode(const QString &str);
+
 private:
     JsonViewSettings *jsonViewSettings_;
     ScintillaEditor *scintillaEditor_;
 
     QWidget *mainWidget_;
+
+    QDockWidget *dockWidget_;
+    QJsonModel *jsonModel_;
+    QTreeView *treeView_;
 };
 
 #endif  // NDD_JSON_VIEWER_NDDJSONPLUGIN_H

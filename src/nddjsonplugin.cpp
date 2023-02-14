@@ -4,25 +4,55 @@
 
 #include "nddjsonplugin.h"
 
+#include <docktitlewidget.h>
 #include <jsonviewsettings.h>
+#include <qjsonmodel.h>
 #include <scintillaeditor.h>
 
-#include <QAction>
+#include <QDockWidget>
+#include <QHeaderView>
 #include <QMainWindow>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QTreeView>
 
 NDDJsonPlugin::NDDJsonPlugin(QWidget *mainWidget, const QString &pluginPath, QsciScintilla *pEdit, QObject *parent)
     : QObject(parent),
       scintillaEditor_(nullptr),
       jsonViewSettings_(new JsonViewSettings(pluginPath)),
-      mainWidget_(mainWidget)
+      mainWidget_(mainWidget),
+      dockWidget_(new QDockWidget),
+      jsonModel_(new QJsonModel),
+      treeView_(new QTreeView)
 {
-    // addJsonViewMenu();
-    // jsonViewSettings_->show();
+    dockWidget_->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
+    dockWidget_->setAllowedAreas(Qt::LeftDockWidgetArea);
+    dockWidget_->hide();
+
+    auto dockWidgetTitle = new DockTitleWidget;
+    dockWidget_->setTitleBarWidget(dockWidgetTitle);
+
+    connect(dockWidgetTitle, &DockTitleWidget::sigRefreshClicked, this, [this] { refreshTableJson(); });
+    connect(dockWidgetTitle, &DockTitleWidget::sigValidateClicked, this, [this] { validateJson(); });
+    connect(dockWidgetTitle, &DockTitleWidget::sigFormatClicked, this, [this] { formattingJson(); });
+    connect(dockWidgetTitle, &DockTitleWidget::sigFindClicked, this, [this](const QString &str) { findNode(str); });
+
+    treeView_->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    treeView_->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    treeView_->setModel(jsonModel_);
+
+    dockWidget_->setWidget(treeView_);
+
+    auto mainWindow = dynamic_cast<QMainWindow *>(mainWidget);
+    mainWindow->addDockWidget(Qt::LeftDockWidgetArea, dockWidget_);
 }
 void NDDJsonPlugin::getJsonViewMenu(QMenu *menu)
 {
+    menu->addAction("Show Json Table", this, [this] {
+        refreshTableJson();
+        dockWidget_->show();
+    });
+
     menu->addAction(
         "Formatting Json(Ctrl+F8)", this, [this] { formattingJson(); }, Qt::CTRL + Qt::Key_F8);
     menu->addAction(
@@ -173,7 +203,55 @@ void NDDJsonPlugin::compressJson()
         reportError(result);
     }
 }
-void NDDJsonPlugin::setScintilla(const std::function<QsciScintilla *()> & cb)
+void NDDJsonPlugin::refreshTableJson()
+{
+    if (!scintillaEditor_)
+    {
+        showMessage("Error", "Editor is invalid.", 1);
+        return;
+    }
+
+    auto selectedText = scintillaEditor_->getJsonText();
+    auto result = jsonModel_->loadJson(QByteArray::fromStdString(selectedText));
+    if (!result)
+    {
+        showMessage("Error", "Json string is not parse.", 1);
+    }
+}
+void NDDJsonPlugin::validateJson()
+{
+    if (!scintillaEditor_)
+    {
+        showMessage("Error", "Editor is invalid.", 1);
+        return;
+    }
+
+    auto setting_ = jsonViewSettings_->getPluginSetting();
+    const auto selectedText = scintillaEditor_->getJsonText();
+    auto result = JsonHandler(setting_.parseOptions).ValidateJson(selectedText);
+    if (result.success)
+    {
+        showMessage("Tips", "JSON looks good. No errors found while validating it.", 1);
+    }
+    else
+    {
+        reportError(result);
+    }
+}
+void NDDJsonPlugin::findNode(const QString &str)
+{
+    auto match = jsonModel_->match(jsonModel_->index(0, 0), Qt::DisplayRole, QVariant::fromValue(str));
+    if (!match.isEmpty())
+    {
+        treeView_->setExpanded(match.first(), true);
+        treeView_->keyboardSearch(str);
+    }
+    else
+    {
+        showMessage("Warning", QString("Cannot found with %1").arg(str).toStdString(), 1);
+    }
+}
+void NDDJsonPlugin::setScintilla(const std::function<QsciScintilla *()> &cb)
 {
     if (scintillaEditor_)
     {

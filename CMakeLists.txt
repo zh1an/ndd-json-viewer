@@ -13,7 +13,7 @@ find_library(QSCINT_LIB qmyedit_qt5 PATH ${QSCINT_SDK_PATH}/lib)
 
 aux_source_directory(src SRC_FILES)
 
-add_library(${PROJECT_NAME} SHARED ${SRC_FILES} src/jsonviewsettings.ui)
+add_library(${PROJECT_NAME} SHARED ${SRC_FILES} src/jsonviewsettings.ui src/image.qrc src/docktitlewidget.ui)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
         src
