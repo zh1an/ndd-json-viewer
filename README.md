@@ -12,7 +12,11 @@
 
 
 
-该项目仅支持使用 `CMake` 编译。
+该项目仅支持使用 `CMake` 和 `qmake` 编译。
+
+
+
+#### CMake 编译
 
 依赖项：
 
@@ -31,6 +35,10 @@ mkdir build && cd build
 cmake .. -DCMAKE_PREFIX_PATH=D:\Qt5.12.11\Qt5.12.11\5.12.11\msvc2015_64\lib\cmake -DQSCINT_SDK_PATH=F:\gitee\QScint_SDK -G Ninja
 ninja
 ```
+
+#### QMake 编译
+
+将该工程放在 `%ndd_root_path%/src/plugin` 文件夹中，且已经将 `QScint` 已经编译成动态库。使用 `QtCreator` 打开 `%ndd_root_path%/src/plugin/ndd-json-viewer.pro` 文件即可一键编译。
 
 
 
