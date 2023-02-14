@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/format.ico</file>
+        <file>res/Icon.ico</file>
+        <file>res/Refresh.ico</file>
+        <file>res/search.ico</file>
+        <file>res/validate.ico</file>
+    </qresource>
+</RCC>
