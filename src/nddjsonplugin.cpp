@@ -255,8 +255,20 @@ void NDDJsonPlugin::findNode(const QString &str)
                                    Qt::MatchContains | Qt::MatchRecursive | Qt::MatchRegExp | Qt::MatchWrap);
     if (!match.isEmpty())
     {
-        treeView_->setExpanded(match.first(), true);
-        treeView_->setCurrentIndex(match.first());
+        if (match.first() == selected)
+        {
+            match.removeFirst();
+        }
+
+        if (!match.isEmpty())
+        {
+            treeView_->setExpanded(match.first(), true);
+            treeView_->setCurrentIndex(match.first());
+        }
+        else
+        {
+            showMessage("Warning", "match is invalid.", 1);
+        }
     }
     else
     {
