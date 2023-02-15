@@ -15,17 +15,12 @@ DockTitleWidget::DockTitleWidget(QWidget *parent) : QWidget(parent), ui(new Ui::
     ui->pb_validate->setIcon(QIcon(tr(":/res/validate.ico")));
     ui->pb_format->setIcon(QIcon(tr(":/res/format.ico")));
     ui->pb_search->setIcon(QIcon(tr(":/res/search.ico")));
-
-    ui->pb_search->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    //    ui->pb_search->sizePolicy().setVerticalStretch(20);
-    //    ui->pb_search->sizePolicy().setHorizontalStretch(20);
-    ui->pb_search->setFixedSize(20, 20);
-    ui->pb_search->setMinimumWidth(20);
-    ui->pb_search->setMaximumWidth(20);
+    ui->pb_close->setIcon(QIcon(tr(":/res/close.ico")));
 
     connect(ui->pb_refresh, &QPushButton::clicked, this, [this] { emit sigRefreshClicked(); });
     connect(ui->pb_validate, &QPushButton::clicked, this, [this] { emit sigValidateClicked(); });
     connect(ui->pb_format, &QPushButton::clicked, this, [this] { emit sigFormatClicked(); });
+    connect(ui->pb_close, &QPushButton::clicked, this, [this] { emit sigCloseClicked(); });
     connect(ui->pb_search, &QPushButton::clicked, this, [this] {
         ui->lineEdit->selectAll();
         emit sigFindClicked(ui->lineEdit->text());
