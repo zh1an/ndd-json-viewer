@@ -26,6 +26,7 @@ NDDJsonPlugin::NDDJsonPlugin(QWidget *mainWidget, const QString &pluginPath, Qsc
       treeView_(new QTreeView)
 {
     dockWidget_->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
+
     dockWidget_->setAllowedAreas(Qt::LeftDockWidgetArea);
     dockWidget_->hide();
 
@@ -35,10 +36,12 @@ NDDJsonPlugin::NDDJsonPlugin(QWidget *mainWidget, const QString &pluginPath, Qsc
     connect(dockWidgetTitle, &DockTitleWidget::sigRefreshClicked, this, [this] { refreshTableJson(); });
     connect(dockWidgetTitle, &DockTitleWidget::sigValidateClicked, this, [this] { validateJson(); });
     connect(dockWidgetTitle, &DockTitleWidget::sigFormatClicked, this, [this] { formattingJson(); });
+    connect(dockWidgetTitle, &DockTitleWidget::sigCloseClicked, this, [this] { dockWidget_->hide(); });
     connect(dockWidgetTitle, &DockTitleWidget::sigFindClicked, this, [this](const QString &str) { findNode(str); });
 
     treeView_->setEditTriggers(QAbstractItemView::NoEditTriggers);
     treeView_->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
     treeView_->setModel(jsonModel_);
 
     dockWidget_->setWidget(treeView_);
@@ -240,15 +243,41 @@ void NDDJsonPlugin::validateJson()
 }
 void NDDJsonPlugin::findNode(const QString &str)
 {
-    auto match = jsonModel_->match(jsonModel_->index(0, 0), Qt::DisplayRole, QVariant::fromValue(str));
+    bool isStartSelected = false;
+    auto selected = treeView_->currentIndex();
+    if (!selected.isValid())
+    {
+        isStartSelected = true;
+        selected = jsonModel_->index(0, 0);
+    }
+
+    auto match = jsonModel_->match(selected, Qt::DisplayRole, QVariant::fromValue("*" + str + "*"), 2,
+                                   Qt::MatchContains | Qt::MatchRecursive | Qt::MatchRegExp | Qt::MatchWrap);
     if (!match.isEmpty())
     {
         treeView_->setExpanded(match.first(), true);
-        treeView_->keyboardSearch(str);
+        treeView_->setCurrentIndex(match.first());
     }
     else
     {
-        showMessage("Warning", QString("Cannot found with %1").arg(str).toStdString(), 1);
+        if (!isStartSelected)
+        {
+            match = jsonModel_->match(jsonModel_->index(0, 0), Qt::DisplayRole, QVariant::fromValue("*" + str + "*"), 2,
+                                      Qt::MatchContains | Qt::MatchRecursive | Qt::MatchRegExp | Qt::MatchWrap);
+            if (!match.isEmpty())
+            {
+                treeView_->setExpanded(match.first(), true);
+                treeView_->setCurrentIndex(match.first());
+            }
+            else
+            {
+                showMessage("Warning", QString("Cannot found with %1").arg(str).toStdString(), 1);
+            }
+        }
+        else
+        {
+            showMessage("Warning", QString("Cannot found with %1").arg(str).toStdString(), 1);
+        }
     }
 }
 void NDDJsonPlugin::setScintilla(const std::function<QsciScintilla *()> &cb)

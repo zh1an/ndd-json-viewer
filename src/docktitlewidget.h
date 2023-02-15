@@ -26,6 +26,7 @@ signals:
     void sigRefreshClicked();
     void sigValidateClicked();
     void sigFormatClicked();
+    void sigCloseClicked();
     void sigFindClicked(const QString &str);
 
 private:
