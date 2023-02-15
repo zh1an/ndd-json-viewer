@@ -243,27 +243,36 @@ void NDDJsonPlugin::validateJson()
 }
 void NDDJsonPlugin::findNode(const QString &str)
 {
+    bool isStartSelected = false;
     auto selected = treeView_->currentIndex();
     if (!selected.isValid())
     {
+        isStartSelected = true;
         selected = jsonModel_->index(0, 0);
     }
 
-    auto match = jsonModel_->match(selected, Qt::DisplayRole, QVariant::fromValue(str), 2,
-                                   Qt::MatchContains | Qt::MatchRecursive | Qt::MatchRegExp);
+    auto match = jsonModel_->match(selected, Qt::DisplayRole, QVariant::fromValue("*" + str + "*"), 2,
+                                   Qt::MatchContains | Qt::MatchRecursive | Qt::MatchRegExp | Qt::MatchWrap);
     if (!match.isEmpty())
     {
         treeView_->setExpanded(match.first(), true);
-        treeView_->keyboardSearch(str);
+        treeView_->setCurrentIndex(match.first());
     }
     else
     {
-        match = jsonModel_->match(jsonModel_->index(0, 0), Qt::DisplayRole, QVariant::fromValue(str), 2,
-                                  Qt::MatchContains | Qt::MatchRecursive | Qt::MatchRegExp);
-        if (!match.isEmpty())
+        if (!isStartSelected)
         {
-            treeView_->setExpanded(match.first(), true);
-            treeView_->keyboardSearch(str);
+            match = jsonModel_->match(jsonModel_->index(0, 0), Qt::DisplayRole, QVariant::fromValue("*" + str + "*"), 2,
+                                      Qt::MatchContains | Qt::MatchRecursive | Qt::MatchRegExp | Qt::MatchWrap);
+            if (!match.isEmpty())
+            {
+                treeView_->setExpanded(match.first(), true);
+                treeView_->setCurrentIndex(match.first());
+            }
+            else
+            {
+                showMessage("Warning", QString("Cannot found with %1").arg(str).toStdString(), 1);
+            }
         }
         else
         {
