@@ -289,10 +289,15 @@ public:
     void objectContentToJson(QJsonObject jsonObject, QByteArray &json, int indent, bool compact);
     void valueToJson(QJsonValue jsonValue, QByteArray &json, int indent, bool compact);
 
+public:
+    void setTableViewOrTreeView(bool isTable = false) { isTableView_ = isTable; }
+
 private:
     QJsonValue genJson(QJsonTreeItem *) const;
     QJsonTreeItem *mRootItem = nullptr;
     QStringList mHeaders;
+
+    bool isTableView_ = false;
 };
 
 #endif  // QJSONMODEL_H
