@@ -43,6 +43,7 @@ private:
     void refreshTableJson();
     void validateJson();
     void findNode(const QString &str);
+    bool searchNode(QModelIndex index, const QString& str);
 
 private:
     JsonViewSettings *jsonViewSettings_;

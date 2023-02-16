@@ -252,6 +252,19 @@
     </property>
    </widget>
   </widget>
+  <widget class="QCheckBox" name="cb_use_table_view">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>140</y>
+     <width>241</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Json tree use TableView</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

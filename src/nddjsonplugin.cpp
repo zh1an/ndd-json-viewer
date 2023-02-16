@@ -48,6 +48,8 @@ NDDJsonPlugin::NDDJsonPlugin(QWidget *mainWidget, const QString &pluginPath, Qsc
 
     auto mainWindow = dynamic_cast<QMainWindow *>(mainWidget);
     mainWindow->addDockWidget(Qt::LeftDockWidgetArea, dockWidget_);
+
+    jsonModel_->setTableViewOrTreeView(jsonViewSettings_->getPluginSetting().useTableView);
 }
 void NDDJsonPlugin::getJsonViewMenu(QMenu *menu)
 {
@@ -243,50 +245,37 @@ void NDDJsonPlugin::validateJson()
 }
 void NDDJsonPlugin::findNode(const QString &str)
 {
-    bool isStartSelected = false;
     auto selected = treeView_->currentIndex();
-    if (!selected.isValid())
+    if (searchNode(selected, str))
     {
-        isStartSelected = true;
-        selected = jsonModel_->index(0, 0);
+        return;
     }
 
-    auto match = jsonModel_->match(selected, Qt::DisplayRole, QVariant::fromValue("*" + str + "*"), 2,
-                                   Qt::MatchContains | Qt::MatchRecursive | Qt::MatchRegExp | Qt::MatchWrap);
-    if (!match.isEmpty())
+    while (true)
     {
-        if (match.first() == selected)
+        auto parent = selected.parent();
+        if (!parent.isValid())
         {
-            match.removeFirst();
-        }
-
-        if (!match.isEmpty())
-        {
-            treeView_->setExpanded(match.first(), true);
-            treeView_->setCurrentIndex(match.first());
+            break;
         }
         else
         {
-            showMessage("Warning", "match is invalid.", 1);
+            selected = parent;
         }
+    }
+
+    if (!selected.isValid())
+    {
+        selected = jsonModel_->index(0, 0);
     }
     else
     {
-        if (!isStartSelected)
-        {
-            match = jsonModel_->match(jsonModel_->index(0, 0), Qt::DisplayRole, QVariant::fromValue("*" + str + "*"), 2,
-                                      Qt::MatchContains | Qt::MatchRecursive | Qt::MatchRegExp | Qt::MatchWrap);
-            if (!match.isEmpty())
-            {
-                treeView_->setExpanded(match.first(), true);
-                treeView_->setCurrentIndex(match.first());
-            }
-            else
-            {
-                showMessage("Warning", QString("Cannot found with %1").arg(str).toStdString(), 1);
-            }
-        }
-        else
+        selected = selected.siblingAtRow(selected.row() + 1);
+    }
+
+    if (!searchNode(selected, str))
+    {
+        if (!searchNode(jsonModel_->index(0, 0), str))
         {
             showMessage("Warning", QString("Cannot found with %1").arg(str).toStdString(), 1);
         }
@@ -301,4 +290,28 @@ void NDDJsonPlugin::setScintilla(const std::function<QsciScintilla *()> &cb)
     }
 
     scintillaEditor_ = new ScintillaEditor(cb);
+}
+bool NDDJsonPlugin::searchNode(QModelIndex index, const QString &str)
+{
+    auto match = jsonModel_->match(index, Qt::DisplayRole, QVariant::fromValue("*" + str + "*"), -1,
+                                   Qt::MatchContains | Qt::MatchRecursive | Qt::MatchRegExp);
+
+    if (!match.isEmpty())
+    {
+        if (match.first() == treeView_->currentIndex())
+        {
+            match.removeFirst();
+        }
+        if (!match.isEmpty())
+        {
+            treeView_->setExpanded(match.first(), true);
+            treeView_->setCurrentIndex(match.first());
+
+            return true;
+        }
+
+        return false;
+    }
+
+    return false;
 }

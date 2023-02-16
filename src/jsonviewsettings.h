@@ -42,6 +42,7 @@ private:
     [[nodiscard]] int getIndentation() const;
     [[nodiscard]] int getLineEnding() const;
     [[nodiscard]] int getLineFormatting() const;
+    [[nodiscard]] int getJsonViewUseTableView() const;
 
     void initConnection();
 

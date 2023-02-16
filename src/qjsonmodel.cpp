@@ -293,11 +293,29 @@ QVariant QJsonModel::data(const QModelIndex &index, int role) const
 
    auto *item = static_cast<QJsonTreeItem*>(index.internalPointer());
    if (role == Qt::DisplayRole) {
-       if (index.column() == 0)
-           return QString("%1").arg(item->key());
+       if (!isTableView_) {
+           if (item->type() == QJsonValue::Array) {
+               if (item->childCount() != 0) {
+                   return QString("%1: [%2]").arg(item->key()).arg(item->childCount());
+               } else {
+                   return item->key() + ": " + item->value().toString();
+               }
+           } else if (item->type() == QJsonValue::Object) {
+               if (item->childCount() != 0) {
+                   return QString("%1: {%2}").arg(item->key()).arg(item->childCount());
+               } else {
+                   return item->key() + ": " + item->value().toString();
+               }
+           } else {
+               return item->key() + ": " + item->value().toString();
+           }
+       } else {
+           if (index.column() == 0)
+               return QString("%1").arg(item->key());
 
-       if (index.column() == 1)
-           return item->value();
+           if (index.column() == 1)
+               return item->value();
+       }
    } else if (Qt::EditRole == role) {
        if (index.column() == 1)
            return item->value();
@@ -326,8 +344,15 @@ QVariant QJsonModel::headerData(int section, Qt::Orientation orientation, int ro
    if (role != Qt::DisplayRole)
        return {};
 
-   if (orientation == Qt::Horizontal)
-       return mHeaders.value(section);
+   if (orientation == Qt::Horizontal) {
+       if (isTableView_)
+       {
+           return mHeaders.value(section);
+       }
+       else {
+           return "JSON";
+       }
+   }
    else
        return {};
 }
@@ -382,7 +407,11 @@ int QJsonModel::rowCount(const QModelIndex &parent) const
 int QJsonModel::columnCount(const QModelIndex &parent) const
 {
    Q_UNUSED(parent)
-   return 2;
+   if (isTableView_) {
+       return 2;
+   } else {
+       return 1;
+   }
 }
 
 Qt::ItemFlags QJsonModel::flags(const QModelIndex &index) const

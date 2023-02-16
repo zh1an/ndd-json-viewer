@@ -40,6 +40,9 @@ void JsonViewSettings::slot_ConfirmClicked()
     configSetting_->setValue(INI_FORMATTING_EOL_NAME, getLineEnding());
     configSetting_->setValue(INI_FORMATTING_LINE_NAME, getLineFormatting());
 
+    //! use table view or not
+    configSetting_->setValue(INI_OTHER_USE_TABLE_VIEW_NAME, getJsonViewUseTableView());
+
     //! other settings for PlugSettings
     pluginSetting_.bFollowCurrentTab = ui->cb_follow_current_tab->isChecked();
     pluginSetting_.bAutoFormat = ui->cb_auto_format_when_opened->isChecked();
@@ -50,6 +53,9 @@ void JsonViewSettings::slot_ConfirmClicked()
     pluginSetting_.indent.style = static_cast<IndentStyle>(getIndentation());
     pluginSetting_.lineEnding = static_cast<LineEnding>(getLineEnding());
     pluginSetting_.lineFormat = static_cast<LineFormat>(getLineFormatting());
+
+    //! use table view or not
+    pluginSetting_.useTableView = getJsonViewUseTableView();
 
     this->hide();
 }
@@ -115,6 +121,13 @@ void JsonViewSettings::init(const QString &pluginPath)
     }
     pluginSetting_.parseOptions.bIgnoreTrailingComma = configSetting_->value(INI_OTHER_IGNORE_COMMA_NAME).toBool();
     ui->cb_ignore_trailing_comma->setChecked(pluginSetting_.parseOptions.bIgnoreTrailingComma);
+
+    if (!configSetting_->contains(INI_OTHER_USE_TABLE_VIEW_NAME))
+    {
+        configSetting_->setValue(INI_OTHER_USE_TABLE_VIEW_NAME, 1);
+    }
+    pluginSetting_.useTableView = configSetting_->value(INI_OTHER_USE_TABLE_VIEW_NAME).toBool();
+    ui->cb_use_table_view->setChecked(pluginSetting_.useTableView);
 }
 
 void JsonViewSettings::setIndentation(int var)
@@ -308,4 +321,8 @@ int JsonViewSettings::getLineFormatting() const
     }
 
     return (int)LineFormat::DEFAULT;
+}
+int JsonViewSettings::getJsonViewUseTableView() const
+{
+    return ui->cb_use_table_view->isChecked();
 }
